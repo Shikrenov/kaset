@@ -484,8 +484,7 @@ extension PlayerService {
         observedVideoId: String?,
         title: String,
         artist: String,
-        resolvedVideoId: String,
-        thumbnailURL: URL?,
+        thumbnailUrl: String,
         trackChanged: Bool
     ) -> Bool {
         guard self.queue.isEmpty,
@@ -506,12 +505,16 @@ extension PlayerService {
             return false
         }
 
+        let resolvedVideoId = self.resolvedObservedVideoId(observedVideoId)
+        let thumbnailURL = URL(string: thumbnailUrl)
+
         self.adoptObservedTrackAsCurrentQueue(
             title: title,
             artist: artist,
             resolvedVideoId: resolvedVideoId,
             thumbnailURL: thumbnailURL
         )
+
         return true
     }
 
@@ -666,8 +669,7 @@ extension PlayerService {
             observedVideoId: observedVideoId,
             title: title,
             artist: artist,
-            resolvedVideoId: resolvedVideoId,
-            thumbnailURL: thumbnailURL,
+            thumbnailUrl: thumbnailUrl,
             trackChanged: trackChanged
         ) {
             return

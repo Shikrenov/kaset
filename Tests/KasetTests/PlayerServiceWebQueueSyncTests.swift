@@ -363,8 +363,8 @@ struct PlayerServiceWebQueueSyncTests {
         #expect(self.playerService.currentTrack?.artistsDisplay == "Artist 2")
     }
 
-    @Test("Unexpected autoplay at end of queue is stopped")
-    func unexpectedAutoplayAtEndOfQueueIsStopped() async {
+    @Test("Unexpected autoplay at end of queue is appended and becomes current")
+    func unexpectedAutoplayAtEndOfQueueIsAppendedAndBecomesCurrent() async {
         let songs = [
             Song(id: "1", title: "Song 1", artists: [], album: nil, duration: 180, thumbnailURL: nil, videoId: "v1"),
             Song(id: "2", title: "Song 2", artists: [], album: nil, duration: 200, thumbnailURL: nil, videoId: "v2"),
@@ -381,13 +381,18 @@ struct PlayerServiceWebQueueSyncTests {
             videoId: "unexpected"
         )
 
-        #expect(self.playerService.state == .ended)
-        #expect(self.playerService.currentIndex == 1)
-        #expect(self.playerService.currentTrack?.videoId == "v2")
+        #expect(self.playerService.state == .playing)
+        #expect(self.playerService.queue.count == 3)
+        #expect(self.playerService.currentIndex == 2)
+        #expect(self.playerService.queue[0].videoId == "v1")
+        #expect(self.playerService.queue[1].videoId == "v2")
+        #expect(self.playerService.queue[2].videoId == "unexpected")
+        #expect(self.playerService.currentTrack?.videoId == "unexpected")
+        #expect(self.playerService.currentTrack?.title == "Unexpected Song")
     }
 
-    @Test("Autoplay after native queue end is suppressed")
-    func autoplayAfterQueueEndIsSuppressed() async {
+    @Test("Autoplay after native queue end is appended and becomes current")
+    func autoplayAfterQueueEndIsAppendedAndBecomesCurrent() async {
         let songs = [
             Song(id: "1", title: "Song 1", artists: [], album: nil, duration: 180, thumbnailURL: nil, videoId: "v1"),
             Song(id: "2", title: "Song 2", artists: [], album: nil, duration: 200, thumbnailURL: nil, videoId: "v2"),
@@ -405,13 +410,18 @@ struct PlayerServiceWebQueueSyncTests {
             videoId: "unexpected"
         )
 
-        #expect(self.playerService.state == .ended)
-        #expect(self.playerService.currentIndex == 1)
-        #expect(self.playerService.currentTrack?.videoId == "v2")
+        #expect(self.playerService.state == .playing)
+        #expect(self.playerService.queue.count == 3)
+        #expect(self.playerService.currentIndex == 2)
+        #expect(self.playerService.queue[0].videoId == "v1")
+        #expect(self.playerService.queue[1].videoId == "v2")
+        #expect(self.playerService.queue[2].videoId == "unexpected")
+        #expect(self.playerService.currentTrack?.videoId == "unexpected")
+        #expect(self.playerService.currentTrack?.title == "Unexpected Song")
     }
 
-    @Test("Unexpected mid-track autoplay is corrected after playback confirmation")
-    func unexpectedMidTrackAutoplayIsCorrected() async {
+    @Test("Unexpected mid-track autoplay at terminal boundary is appended and becomes current")
+    func unexpectedMidTrackAutoplayAtTerminalBoundaryIsAppendedAndBecomesCurrent() async {
         let songs = [
             Song(id: "1", title: "Song 1", artists: [], album: nil, duration: 180, thumbnailURL: nil, videoId: "v1"),
             Song(id: "2", title: "Song 2", artists: [], album: nil, duration: 200, thumbnailURL: nil, videoId: "v2"),
@@ -436,9 +446,13 @@ struct PlayerServiceWebQueueSyncTests {
 
         try? await Task.sleep(for: .milliseconds(100))
 
-        #expect(self.playerService.currentIndex == 1)
-        #expect(self.playerService.currentTrack?.videoId == "v2")
-        #expect(self.playerService.currentTrack?.title == "Song 2")
+        #expect(self.playerService.queue.count == 3)
+        #expect(self.playerService.currentIndex == 2)
+        #expect(self.playerService.queue[0].videoId == "v1")
+        #expect(self.playerService.queue[1].videoId == "v2")
+        #expect(self.playerService.queue[2].videoId == "unexpected")
+        #expect(self.playerService.currentTrack?.videoId == "unexpected")
+        #expect(self.playerService.currentTrack?.title == "Best Song Ever")
     }
 
     @Test("Observed in-queue track realigns current index")
